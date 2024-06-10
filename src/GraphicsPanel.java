@@ -14,6 +14,7 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
     private Player player;
     private boolean[] pressedKeys;
     private ArrayList<Coin> coins;
+    private Rectangle one;
 
     public GraphicsPanel() {
         try {
@@ -36,6 +37,7 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
         super.paintComponent(g);  // just do this
         g.drawImage(background, 0, 0, null);  // the order that things get "painted" matter; we put background down first
         g.drawImage(area, 220,268,null);
+        one = new Rectangle(890, 560, 155, 45);
         // Rotate and draw player
         Graphics2D g2d = (Graphics2D) g;
         AffineTransform originalTransform = g2d.getTransform();
@@ -61,14 +63,19 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
 
         // Draw score
         g.setFont(new Font("Courier New", Font.BOLD, 24));
-        g.drawString("Score: " + player.getScore(), 20, 40);
+        g.drawString("Score: " + player.getScore(), 34, 40);
+        g.drawString(getMousePosition().getX() + ", " + getMousePosition().getY(), 600, 75);
 
         // Handle key presses for movement and rotation
-        if (pressedKeys[65]) { // A
-            player.rotateLeft();
+        if (pressedKeys[65]) {
+            if(pressedKeys[87] || pressedKeys[83]) {// A
+                player.rotateLeft();
+            }
         }
-        if (pressedKeys[68]) { // D
-            player.rotateRight();
+        if (pressedKeys[68]) {
+            if(pressedKeys[87] || pressedKeys[83]) {// D
+                player.rotateRight();
+            }
         }
         if (pressedKeys[87]) { // W
             player.moveForward();

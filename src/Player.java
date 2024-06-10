@@ -14,8 +14,8 @@ public class Player {
     private int score;
 
     public Player(String Img) {
-        xCoord = 50; // starting position is (50, 435), right on top of ground
-        yCoord = 435;
+        xCoord = 770; // starting position is (50, 435), right on top of ground
+        yCoord = 710;
         score = 0;
         try {
             norm = ImageIO.read(new File(Img));

@@ -7,7 +7,7 @@ public class MainFrame implements Runnable {
     public MainFrame() {
         JFrame frame = new JFrame("Rotating Sprite");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1200, 660); // Adjusted size
+        frame.setSize(1300, 950); // Adjusted size
         frame.setLocationRelativeTo(null); // Auto-centers frame on screen
 
         // Create and add panel
