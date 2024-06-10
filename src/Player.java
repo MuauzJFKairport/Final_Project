@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public class Player {
     private final double MOVE_AMT = 3; // Increase movement amount
-    private final double ROTATE_AMT = 0.027; // Reduce rotation amount
+    private final double ROTATE_AMT = 0.024; // Reduce rotation amount
     private BufferedImage norm;
     private double xCoord, yCoord;
     private double angle = 0; // Rotation angle in radians

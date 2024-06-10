@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 public class GraphicsPanel extends JPanel implements KeyListener, MouseListener {
     private BufferedImage background;
+    private BufferedImage area;
     private Player player;
     private boolean[] pressedKeys;
     private ArrayList<Coin> coins;
@@ -17,6 +18,7 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
     public GraphicsPanel() {
         try {
             background = ImageIO.read(new File("src/parking-lot.png"));
+            area = ImageIO.read(new File("src/yellow.png"));
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -33,7 +35,7 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);  // just do this
         g.drawImage(background, 0, 0, null);  // the order that things get "painted" matter; we put background down first
-
+        g.drawImage(area, 220,268,null);
         // Rotate and draw player
         Graphics2D g2d = (Graphics2D) g;
         AffineTransform originalTransform = g2d.getTransform();
