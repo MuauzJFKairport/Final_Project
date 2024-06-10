@@ -2,6 +2,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -13,14 +14,13 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
     private boolean[] pressedKeys;
     private ArrayList<Coin> coins;
 
-
     public GraphicsPanel() {
         try {
             background = ImageIO.read(new File("src/parking-lot.png"));
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-        player = new Player("src/whitecar.png", "src/whitecarR.png", "src/whitecarL.png", "src/whitecarD.png");
+        player = new Player("src/whitecar.png");
         coins = new ArrayList<>();
         pressedKeys = new boolean[128]; // 128 keys on keyboard, max keycode is 127
         addKeyListener(this);
@@ -33,9 +33,18 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);  // just do this
         g.drawImage(background, 0, 0, null);  // the order that things get "painted" matter; we put background down first
-        g.drawImage(player.getPlayerImage(), player.getxCoord(), player.getyCoord(), null);
 
-        // this loop does two things:  it draws each Coin that gets placed with mouse clicks,
+        // Rotate and draw player
+        Graphics2D g2d = (Graphics2D) g;
+        AffineTransform originalTransform = g2d.getTransform();
+        AffineTransform transform = new AffineTransform();
+        transform.translate(player.getxCoord(), player.getyCoord());
+        transform.rotate(player.getAngle(), player.getPlayerImage().getWidth() / 2.0, player.getPlayerImage().getHeight() / 2.0);
+        g2d.setTransform(transform);
+        g2d.drawImage(player.getPlayerImage(), 0, 0, null);
+        g2d.setTransform(originalTransform);
+
+        // This loop does two things: it draws each Coin that gets placed with mouse clicks,
         // and it also checks if the player has "intersected" (collided with) the Coin, and if so,
         // the score goes up and the Coin is removed from the arraylist
         for (int i = 0; i < coins.size(); i++) {
@@ -48,49 +57,22 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
             }
         }
 
-        // draw score
+        // Draw score
         g.setFont(new Font("Courier New", Font.BOLD, 24));
         g.drawString("Score: " + player.getScore(), 20, 40);
 
-
-        // player moves left (A)
-        if (pressedKeys[65]) {
-            player.faceLeft();
-            player.moveLeft();
+        // Handle key presses for movement and rotation
+        if (pressedKeys[65]) { // A
+            player.rotateLeft();
         }
-
-         //player moves right (D)
-        if (pressedKeys[68]) {
-            player.faceRight();
-            player.moveRight();
+        if (pressedKeys[68]) { // D
+            player.rotateRight();
         }
-
-        // player moves up (W)
-        if (pressedKeys[87]) {
-            player.faceUp();
-            player.moveUp();
+        if (pressedKeys[87]) { // W
+            player.moveForward();
         }
-
-        // player moves down (S)
-        if (pressedKeys[83]) {
-            player.facedown();
-            player.moveDown();
-        }
-
-        if(pressedKeys[69]){
-            player.moveNE();
-        }
-
-        if(pressedKeys[81]){
-            player.moveNW();
-        }
-
-        if(pressedKeys[90]){
-            player.moveSW();
-        }
-
-        if(pressedKeys[88]){
-            player.moveSE();
+        if (pressedKeys[83]) { // S
+            player.moveBackward();
         }
     }
 

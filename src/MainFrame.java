@@ -5,26 +5,35 @@ public class MainFrame implements Runnable {
     private GraphicsPanel panel;
 
     public MainFrame() {
-        JFrame frame = new JFrame("Cars");
+        JFrame frame = new JFrame("Rotating Sprite");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1200, 660); // 540 height of image + 40 for window menu bar
-        frame.setLocationRelativeTo(null); // auto-centers frame in screen
+        frame.setSize(1200, 660); // Adjusted size
+        frame.setLocationRelativeTo(null); // Auto-centers frame on screen
 
-        // create and add panel
+        // Create and add panel
         panel = new GraphicsPanel();
         frame.add(panel);
 
-        // display the frame
+        // Display the frame
         frame.setVisible(true);
 
-        // start thread, required for animation
+        // Start thread, required for animation
         Thread thread = new Thread(this);
         thread.start();
     }
 
     public void run() {
         while (true) {
-            panel.repaint();  // we don't ever call "paintComponent" directly, but call this to refresh the panel
+            panel.repaint(); // We don't ever call "paintComponent" directly, but call this to refresh the panel
+            try {
+                Thread.sleep(16); // Adjusted for ~60 FPS
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new MainFrame());
     }
 }
