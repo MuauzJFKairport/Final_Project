@@ -114,7 +114,7 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
         // Draw score
         g.setFont(new Font("Courier New", Font.BOLD, 24));
         g.drawString("Score: " + player.getScore(), 20, 40);
-        g.drawString(getMousePosition().getX() + ", " + getMousePosition().getY(), 600, 75);
+        
 
 
 
