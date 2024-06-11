@@ -14,10 +14,6 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
     private Player player;
     private boolean[] pressedKeys;
     private ArrayList<Coin> coins;
-    private Rectangle one;
-    private Rectangle two;
-    private Rectangle three;
-    private Rectangle four;
     private Rectangle five;
     private Rectangle six;
     private Rectangle seven;
@@ -26,7 +22,7 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
     private Rectangle ten;
     private Rectangle eleven;
     private Rectangle twelve;
-
+    Rectangle parkingSpot = new Rectangle(220, 410, 92, 20);
 
     public GraphicsPanel() {
         try {
@@ -53,6 +49,7 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
         super.paintComponent(g);  // just do this
         g.drawImage(background, 0, 0, null);  // the order that things get "painted" matter; we put background down first
         g.drawImage(area, 220,268,null);
+        g.drawRect(parkingSpot.x, parkingSpot.y, parkingSpot.width, parkingSpot.height);
         // Rotate and draw player
         Graphics2D g2d = (Graphics2D) g;
         AffineTransform originalTransform = g2d.getTransform();
@@ -63,10 +60,7 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
         g2d.drawImage(player.getPlayerImage(), 0, 0, null);
         g2d.setTransform(originalTransform);
         g.setColor(Color.red);
-        one = new Rectangle(86 , 71 , 139, 49);
-        two = new Rectangle(334 , 63 , 176, 94);
-        three = new Rectangle(83 , 796 , 136, 53);
-        four = new Rectangle(339 , 297 , 174, 93);
+        g.drawRect(parkingSpot.x, parkingSpot.y, parkingSpot.width, parkingSpot.height);
         five = new Rectangle(81 , 482 , 140, 190);
         six = new Rectangle(239 , 541 , 140, 59);
         seven = new Rectangle(344 , 514 , 168, 134);
@@ -88,10 +82,7 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
                 i--;
             }
         }
-        if (player.playerRect().intersects(one) ||
-                player.playerRect().intersects(two) ||
-                player.playerRect().intersects(three) ||
-                player.playerRect().intersects(four) ||
+        if (
                 player.playerRect().intersects(five) ||
                 player.playerRect().intersects(six) ||
                 player.playerRect().intersects(seven) ||
@@ -113,11 +104,19 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
             }
         }
 
+        if (player.playerRect().intersects(parkingSpot)) {
+            g.setColor(Color.RED);
+            g.setFont(new Font("Arial", Font.BOLD, 50));
+            g.drawString("You Win!", 700, 300);
+        }
+
 
         // Draw score
         g.setFont(new Font("Courier New", Font.BOLD, 24));
         g.drawString("Score: " + player.getScore(), 20, 40);
         g.drawString(getMousePosition().getX() + ", " + getMousePosition().getY(), 600, 75);
+
+
 
         // Handle key presses for movement and rotation
         if (pressedKeys[65]) {
@@ -168,6 +167,9 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
     }
 
     public void mouseEntered(MouseEvent e) { } // unimplemented
+
+    public void mouseExited(MouseEvent e) { } // unimplemented
+}
 
     public void mouseExited(MouseEvent e) { } // unimplemented
 }
