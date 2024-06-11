@@ -7,16 +7,16 @@ import java.io.IOException;
 
 public class Player {
     private final double MOVE_AMT = 3; // Increase movement amount
-    private final double ROTATE_AMT = 0.024; // Reduce rotation amount
+    private final double ROTATE_AMT = 0.022; // Reduce rotation amount
     private BufferedImage norm;
     private double xCoord, yCoord;
     private double angle = 0; // Rotation angle in radians
-    private int score;
+    public int score;
 
     public Player(String Img) {
         xCoord = 770; // starting position is (50, 435), right on top of ground
         yCoord = 710;
-        score = 0;
+        score = 100;
         try {
             norm = ImageIO.read(new File(Img));
         } catch (IOException e) {
@@ -34,6 +34,10 @@ public class Player {
 
     public int getScore() {
         return score;
+    }
+
+    public void subtractScore(){
+        score = score -1;
     }
 
     public void collectCoin() {
@@ -70,6 +74,6 @@ public class Player {
     public Rectangle playerRect() {
         int imageHeight = getPlayerImage().getHeight();
         int imageWidth = getPlayerImage().getWidth();
-        return new Rectangle((int) xCoord, (int) yCoord, imageWidth, imageHeight);
+        return new Rectangle((int) xCoord, (int) yCoord, 63, 143);
     }
 }
