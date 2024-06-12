@@ -13,16 +13,14 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
     private BufferedImage area;
     private Player player;
     private boolean[] pressedKeys;
-    private ArrayList<Coin> coins;
-    private Rectangle five;
-    private Rectangle six;
-    private Rectangle seven;
-    private Rectangle eight;
-    private Rectangle nine;
-    private Rectangle ten;
-    private Rectangle eleven;
-    private Rectangle twelve;
-    Rectangle parkingSpot = new Rectangle(220, 410, 92, 20);
+    private ArrayList<Rectangle> rectangles;
+    private JButton restartButton;
+    private Rectangle parkingSpot = new Rectangle(220, 410, 92, 20);
+    private Rectangle parkingSpot_two = new Rectangle(220, 290, 92, 20);
+    private Rectangle parkingSpot_three = new Rectangle(255, 330, 20, 75);
+    private boolean parkingSpotVisible = false;
+    private boolean parkingSpotTwoVisible = false;
+    private boolean parkingSpotThreeVisible = false;
 
     public GraphicsPanel() {
         try {
@@ -32,24 +30,58 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
             System.out.println(e.getMessage());
         }
         player = new Player("src/whitecar.png");
-        coins = new ArrayList<>();
         pressedKeys = new boolean[128]; // 128 keys on keyboard, max keycode is 127
         addKeyListener(this);
         addMouseListener(this);
         setFocusable(true); // this line of code + one below makes this panel active for keylistener events
         requestFocusInWindow(); // see comment above
-    }
 
-    private void handleCollisions() {
-        Rectangle playerRect = player.playerRect();
+        // Initialize rectangles with proper dimensions
+        rectangles = new ArrayList<>();
+        rectangles.add(new Rectangle(86, 71, 139, 49));
+        rectangles.add(new Rectangle(334, 63, 176, 94));
+        rectangles.add(new Rectangle(83, 796, 136, 53));
+        rectangles.add(new Rectangle(339, 297, 174, 93));
+        rectangles.add(new Rectangle(81, 482, 140, 190));
+        rectangles.add(new Rectangle(239, 541, 140, 59));
+        rectangles.add(new Rectangle(344, 514, 168, 134));
+        rectangles.add(new Rectangle(86, 765, 433, 92));
+        rectangles.add(new Rectangle(771, 378, 145, 40));
+        rectangles.add(new Rectangle(921, 55, 70, 89));
+        rectangles.add(new Rectangle(1051, 173, 145, 568));
+        rectangles.add(new Rectangle(925, 758, 72, 95));
+
+        // Initialize restart button
+        restartButton = new JButton("Restart");
+        restartButton.setBounds(20, 60, 100, 30);
+        restartButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                restartGame();
+                requestFocusInWindow(); // Request focus back to the panel
+            }
+        });
+        setLayout(null); // Use absolute positioning for button
+        add(restartButton);
     }
 
     @Override
     public void paintComponent(Graphics g) {
-        super.paintComponent(g);  // just do this
-        g.drawImage(background, 0, 0, null);  // the order that things get "painted" matter; we put background down first
-        g.drawImage(area, 220,268,null);
-        g.drawRect(parkingSpot.x, parkingSpot.y, parkingSpot.width, parkingSpot.height);
+        super.paintComponent(g);
+        g.drawImage(background, 0, 0, null);
+        g.drawImage(area, 220, 268, null);
+
+        // Draw parking spots if they are visible
+        if (parkingSpotVisible) {
+            g.drawRect(parkingSpot.x, parkingSpot.y, parkingSpot.width, parkingSpot.height);
+        }
+        if (parkingSpotTwoVisible) {
+            g.drawRect(parkingSpot_two.x, parkingSpot_two.y, parkingSpot_two.width, parkingSpot_two.height);
+        }
+        if (parkingSpotThreeVisible) {
+            g.drawRect(parkingSpot_three.x, parkingSpot_three.y, parkingSpot_three.width, parkingSpot_three.height);
+        }
+
         // Rotate and draw player
         Graphics2D g2d = (Graphics2D) g;
         AffineTransform originalTransform = g2d.getTransform();
@@ -58,91 +90,103 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
         transform.rotate(player.getAngle(), player.getPlayerImage().getWidth() / 2.0, player.getPlayerImage().getHeight() / 2.0);
         g2d.setTransform(transform);
         g2d.drawImage(player.getPlayerImage(), 0, 0, null);
+
+        // Restore the original transform for drawing other components
         g2d.setTransform(originalTransform);
-        g.setColor(Color.red);
-        g.drawRect(parkingSpot.x, parkingSpot.y, parkingSpot.width, parkingSpot.height);
-        five = new Rectangle(81 , 482 , 140, 190);
-        six = new Rectangle(239 , 541 , 140, 59);
-        seven = new Rectangle(344 , 514 , 168, 134);
-        eight= new Rectangle(86 , 765 , 433, 92);
-        nine = new Rectangle(771 , 378 , 145, 40);
-        ten = new Rectangle(921 , 55 , 70, 89 );
-        eleven = new Rectangle(1051 , 173 , 145, 568);
-        twelve = new Rectangle(925 , 758 , 72, 95);
 
-        // This loop does two things: it draws each Coin that gets placed with mouse clicks,
-        // and it also checks if the player has "intersected" (collided with) the Coin, and if so,
-        // the score goes up and the Coin is removed from the arraylist
-        for (int i = 0; i < coins.size(); i++) {
-            Coin coin = coins.get(i);
-            g.drawImage(coin.getImage(), coin.getxCoord(), coin.getyCoord(), null); // draw Coin
-            if (player.playerRect().intersects(coin.coinRect())) { // check for collision
-                player.collectCoin();
-                coins.remove(i);
-                i--;
+        // Draw and check for collisions with rectangles
+        for (Rectangle rect : rectangles) {
+            if (player.playerRect().intersects(rect)) {
+                player.subtractScore();
+                restrictPlayerMovement(rect);
             }
         }
-        if (
-                player.playerRect().intersects(five) ||
-                player.playerRect().intersects(six) ||
-                player.playerRect().intersects(seven) ||
-                player.playerRect().intersects(eight) ||
-                player.playerRect().intersects(nine) ||
-                player.playerRect().intersects(ten) ||
-                player.playerRect().intersects(eleven) ||
-                player.playerRect().intersects(twelve)) {
-            player.subtractScore();
-
-            // Check if the player is moving in the direction of collision and prevent movement
-            if (pressedKeys[87]) { // W
-                pressedKeys[87] = false;
-                player.moveBackward();// Stop moving forward
-            }
-            if (pressedKeys[83]) { // S
-                pressedKeys[83] = false;
-                player.moveForward();// Stop moving backward
-            }
-        }
-
-        if (player.playerRect().intersects(parkingSpot)) {
+        if (player.playerRect().intersects(parkingSpot) && player.playerRect().intersects(parkingSpot_two) && player.playerRect().intersects(parkingSpot_three)) {
             g.setColor(Color.RED);
-            g.setFont(new Font("Arial", Font.BOLD, 50));
+            g.setFont(new Font("Courier New", Font.BOLD, 50));
             g.drawString("You Win!", 700, 300);
-        }
+            g.setFont(new Font("Courier New", Font.BOLD, 35));
+            g.drawString("Score: " + player.getScore(), 710, 340);
 
+
+        }
 
         // Draw score
         g.setFont(new Font("Courier New", Font.BOLD, 24));
-        g.drawString("Score: " + player.getScore(), 20, 40);
-        
-
-
+        g.drawString("Score: " + player.getScore(), 30, 40);
 
         // Handle key presses for movement and rotation
         if (pressedKeys[65]) {
-            if (pressedKeys[87] || pressedKeys[83]) {// A
+            if (pressedKeys[87] || pressedKeys[83]) {
                 player.rotateLeft();
             }
         }
         if (pressedKeys[68]) {
-            if (pressedKeys[87] || pressedKeys[83]) {// D
+            if (pressedKeys[87] || pressedKeys[83]) {
                 player.rotateRight();
             }
         }
-        if (pressedKeys[87]) { // W
+        if (pressedKeys[87]) {
             player.moveForward();
         }
-        if (pressedKeys[83]) { // S
+        if (pressedKeys[83]) {
             player.moveBackward();
+        }
+        repaint();
+    }
+
+    // Method to adjust player's position upon collision with a rectangle
+    private void restrictPlayerMovement(Rectangle rect) {
+        Shape playerShape = player.playerRect();
+        Rectangle playerRect = playerShape.getBounds();
+
+        // Calculate overlap
+        double dx = 0, dy = 0;
+
+        // Determine the direction of overlap
+        if (playerRect.x < rect.x) {
+            dx = playerRect.x + playerRect.width - rect.x;
+        } else {
+            dx = rect.x + rect.width - playerRect.x;
+        }
+
+        if (playerRect.y < rect.y) {
+            dy = playerRect.y + playerRect.height - rect.y;
+        } else {
+            dy = rect.y + rect.height - playerRect.y;
+        }
+
+        // Adjust player position to prevent overlap
+        if (Math.abs(dx) < Math.abs(dy)) {
+            // Adjust player position horizontally
+            if (playerRect.x < rect.x) {
+                player.setxCoord(player.getxCoord() - dx);
+            } else {
+                player.setxCoord(player.getxCoord() + dx);
+            }
+        } else {
+            // Adjust player position vertically
+            if (playerRect.y < rect.y) {
+                player.setyCoord(player.getyCoord() - dy);
+            } else {
+                player.setyCoord(player.getyCoord() + dy);
+            }
         }
     }
 
+    // Method to restart the game
+    private void restartGame() {
+        player = new Player("src/whitecar.png"); // Reset the player
+        pressedKeys = new boolean[128]; // Reset key presses
+        repaint(); // Repaint the panel
+        requestFocusInWindow(); // Request focus back to the panel
+    }
+
     // ----- KeyListener interface methods -----
-    public void keyTyped(KeyEvent e) { } // unimplemented
+    public void keyTyped(KeyEvent e) {
+    } // unimplemented
 
     public void keyPressed(KeyEvent e) {
-        // see this for all keycodes: https://stackoverflow.com/questions/15313469/java-keyboard-keycodes-list
-        // A = 65, D = 68, S = 83, W = 87, left = 37, up = 38, right = 39, down = 40, space = 32, enter = 10
         int key = e.getKeyCode();
         pressedKeys[key] = true;
     }
@@ -153,23 +197,13 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener 
     }
 
     // ----- MouseListener interface methods -----
-    public void mouseClicked(MouseEvent e) { }  // unimplemented; if you move your mouse while clicking,
-    // this method isn't called, so mouseReleased is best
+    public void mouseClicked(MouseEvent e) { }
 
-    public void mousePressed(MouseEvent e) { } // unimplemented
+    public void mousePressed(MouseEvent e) { }
 
-    public void mouseReleased(MouseEvent e) {
-        if (e.getButton() == MouseEvent.BUTTON1) {  // left mouse click
-            Point mouseClickLocation = e.getPoint();
-            Coin coin = new Coin(mouseClickLocation.x, mouseClickLocation.y);
-            coins.add(coin);
-        }
-    }
+    public void mouseReleased(MouseEvent e) { }
 
-    public void mouseEntered(MouseEvent e) { } // unimplemented
+    public void mouseEntered(MouseEvent e) { }
 
-    public void mouseExited(MouseEvent e) { } // unimplemented
-}
-
-    public void mouseExited(MouseEvent e) { } // unimplemented
+    public void mouseExited(MouseEvent e) { }
 }
